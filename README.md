@@ -1,4 +1,4 @@
-#Mental Health Management
+# Mental Health Management
 
 Description
 Mental Health Management is an app designed to help users improve their mental well-being. The system lets users record their emotional state daily and suggests actions based on these records. It also provides an emotional history so users can track their progress over time.
