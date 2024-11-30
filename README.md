@@ -1,3 +1,45 @@
+#Mental Health Management
+
+Description
+Mental Health Management is an app designed to help users improve their mental well-being. The system lets users record their emotional state daily and suggests actions based on these records. It also provides an emotional history so users can track their progress over time.
+
+Current Features
+User Registration: Allows new users to sign up with basic personal information.
+Daily Emotional Recording: Users can log their current emotional state and activity.
+Personal Emotional History: Shows the user’s emotional history for tracking trends over time.
+Motivational Messages: Offers personalized suggestions based on the user’s emotional state and activity.
+Logical User Deactivation: Users can be deactivated without losing their historical data.
+API Endpoints
+Users
+POST /usuarios: Creates a new user.
+PUT /usuarios: Updates a user’s personal information.
+DELETE /usuarios/{id}: Deactivates a user logically.
+Emotional History
+POST /usuarios/{id}/historico: Records the user’s emotional state and activity.
+GET /usuarios/{id}/historico_por_periodo: Shows the emotional history of a user within a specific time range.
+GET /usuarios/{id}/historico-cronologico: Displays the user’s full emotional history in chronological order.
+Technologies Used
+Java 17
+Spring Boot 3.3.2
+JPA/Hibernate
+MySQL (managed with Flyway)
+Maven for dependencies
+Planned Improvements
+Emotional Trends: Add charts to show emotional trends over time (using Python/Matplotlib).
+Reminders: Configurable reminders to log emotional states daily.
+User Security: Add JWT authentication for endpoint protection.
+Better Suggestions: Use external APIs for advanced motivational tips.
+User Interface: Build an intuitive frontend.
+Testing: Add unit and integration tests for reliability.
+Deployment: Use Docker containers for easy deployment.
+How to Contribute
+Contributions are welcome! Here’s how you can help:
+
+Fork this repository.
+Create a branch for your feature or fix (git checkout -b my-feature).
+Submit a pull request.
+
+
 # GestaoSaudeMental
 
 Descrição
