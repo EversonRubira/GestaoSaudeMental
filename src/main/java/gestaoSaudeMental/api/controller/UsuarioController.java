@@ -24,9 +24,16 @@ public class UsuarioController {
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
     public DadosUsuarioCriadoDTO cadastrar(@org.jetbrains.annotations.NotNull @RequestBody DadosCadastroUsuario dados) {
-        var usuario = new Usuario(null, dados.getNome(), dados.getEmail(),
-                dados.getTelefone(), dados.getDataNascimento(), dados.getEstadoEmocional(),
-                dados.getAtividadeRealizada(), dados.getGenero());
+        var usuario = new Usuario(
+                null,
+                dados.getNome(),
+                dados.getEmail(),
+                dados.getTelefone(),
+                dados.getDataNascimento(),
+                true,
+                null,
+                null,
+                dados.getGenero());
         repository.save(usuario);
 
         return new DadosUsuarioCriadoDTO(usuario.getId(), usuario.getNome());
@@ -91,6 +98,20 @@ public class UsuarioController {
         return resultados.stream()
                 .map(DadosListagemEstadoEmocionalDTO::new)
                 .toList();
+    }
+
+    @DeleteMapping
+    @Transactional
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public String excluirConta(@PathVariable Long id) {
+        var usuario = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado."));
+
+        usuario.setAtivo(false);
+        repository.save(usuario);
+
+        return "Usuário com ID " + id + " foi desativado com sucesso.";
+
     }
 
 }

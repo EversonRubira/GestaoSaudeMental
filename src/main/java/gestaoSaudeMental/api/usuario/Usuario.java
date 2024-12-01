@@ -20,7 +20,8 @@ public class Usuario {
     private String email;
     private String telefone;
     private LocalDate dataNascimento;
-
+    @Column(name = "ativo")
+    private boolean ativo = true;
     @Enumerated(EnumType.STRING)
     private EstadoEmocionalEnum estadoEmocional;
     @Enumerated(EnumType.STRING)
