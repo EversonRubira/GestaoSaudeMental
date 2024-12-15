@@ -1,4 +1,4 @@
-package gestaoSaudeMental.api.usuario;
+package gestaoSaudeMental.api.domain.usuario;
 
 public enum AtividadeRealizadaEnum {
     EXERCICIO,

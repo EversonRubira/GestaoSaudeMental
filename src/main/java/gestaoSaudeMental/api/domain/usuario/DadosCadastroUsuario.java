@@ -1,4 +1,4 @@
-package gestaoSaudeMental.api.usuario;
+package gestaoSaudeMental.api.domain.usuario;
 
 import jakarta.validation.constraints.*;
 
@@ -22,23 +22,15 @@ public class DadosCadastroUsuario {
     @Past(message = "A data de nascimento deve ser no passado.")
     private LocalDate dataNascimento;
 
-    @NotNull(message = "O estado emocional é obrigatório.")
-    private EstadoEmocionalEnum estadoEmocional;
-
-    @NotNull(message = "A atividade realizada é obrigatória.")
-    private AtividadeRealizadaEnum atividadeRealizada;
-
     @NotNull(message = "O gênero é obrigatório.")
     private GeneroEnum genero;
 
     // Construtor
-    public DadosCadastroUsuario(String nome, String email, String telefone, LocalDate dataNascimento, EstadoEmocionalEnum estadoEmocional, AtividadeRealizadaEnum atividadeRealizada, GeneroEnum genero) {
+    public DadosCadastroUsuario(String nome, String email, String telefone, LocalDate dataNascimento, GeneroEnum genero) {
         this.nome = nome;
         this.email = email;
         this.telefone = telefone;
         this.dataNascimento = dataNascimento;
-        this.estadoEmocional = estadoEmocional;
-        this.atividadeRealizada = atividadeRealizada;
         this.genero = genero;
     }
 
@@ -55,12 +47,6 @@ public class DadosCadastroUsuario {
     public LocalDate getDataNascimento() { return dataNascimento; }
     public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
 
-    public EstadoEmocionalEnum getEstadoEmocional() { return estadoEmocional; }
-    public void setEstadoEmocional(EstadoEmocionalEnum estadoEmocional) { this.estadoEmocional = estadoEmocional; }
-
-    public AtividadeRealizadaEnum getAtividadeRealizada() { return atividadeRealizada; }
-    public void setAtividadeRealizada(AtividadeRealizadaEnum atividadeRealizada) { this.atividadeRealizada = atividadeRealizada; }
-
     public GeneroEnum getGenero() { return genero; }
     public void setGenero(GeneroEnum genero) { this.genero = genero; }
 
@@ -71,8 +57,6 @@ public class DadosCadastroUsuario {
                 ", email='" + email + '\'' +
                 ", telefone='" + telefone + '\'' +
                 ", dataNascimento='" + dataNascimento + '\'' +
-                ", estadoEmocional=" + estadoEmocional +
-                ", atividadeRealizada=" + atividadeRealizada +
                 ", genero=" + genero +
                 '}';
     }

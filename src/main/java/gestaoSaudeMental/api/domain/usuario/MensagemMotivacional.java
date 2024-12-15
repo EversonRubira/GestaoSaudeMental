@@ -1,4 +1,4 @@
-package gestaoSaudeMental.api.usuario;
+package gestaoSaudeMental.api.domain.usuario;
 
 import java.util.EnumMap;
 import java.util.Map;
