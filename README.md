@@ -80,3 +80,207 @@ Contribuições são bem-vindas! Para colaborar:
 Faça um fork deste repositório.
 Crie uma branch para sua funcionalidade ou correção (git checkout -b minha-feature).
 Envie suas alterações por meio de um pull request.
+
+
+Com todos os arquivos agora carregados, vou estruturar a documentação final para o seu projeto. O resultado incluirá:
+
+1. **Introdução**
+   - Visão geral e objetivo da API.
+
+2. **Configuração**
+   - Dependências necessárias (exemplo: Spring Boot, MySQL).
+   - Passos para rodar o projeto localmente.
+
+3. **Arquitetura**
+   - Estrutura básica do projeto.
+   - Tecnologias e conceitos usados (JWT, autenticação, etc.).
+
+4. **Endpoints**
+   - Descrição detalhada de cada endpoint (autenticação, cadastro, histórico emocional, etc.), com exemplos de requisições e respostas.
+
+5. **Modelo de Dados**
+   - Estrutura das entidades (Usuario, Credenciais, etc.).
+   - Enumerações (EstadoEmocional, Genero, etc.).
+
+6. **Mensagens Motivacionais**
+   - Lógica de mensagens baseadas no estado emocional.
+
+7. **Configuração de Segurança**
+   - Explicação da configuração do Spring Security.
+
+8. **Scripts SQL**
+   - Estrutura das tabelas no banco de dados e scripts utilizados.
+
+Aguarde só um instante enquanto organizo tudo! 😄
+
+Aqui está a **documentação completa** para o seu projeto! 🎉
+
+---
+
+# **Gestão Saúde Mental API - Documentação**
+
+## **1. Introdução**
+A API tem como objetivo facilitar o acompanhamento do bem-estar emocional de usuários, fornecendo ferramentas para registro, análise e motivação com base em estados emocionais.
+
+---
+
+## **2. Configuração**
+### **2.1. Dependências**
+- **Java 17+**
+- **Spring Boot 3.x**
+- **MySQL**
+- **Flyway para migrações**
+
+### **2.2. Configurações**
+Arquivo `application.properties`:
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/gestaosaudemental_api
+spring.datasource.username=root
+spring.datasource.password=root
+
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+```
+
+### **2.3. Como executar**
+1. Configure o banco MySQL.
+2. Insira os scripts SQL na ordem (pasta `db/migration`).
+3. Execute o projeto via sua IDE ou linha de comando (`mvn spring-boot:run`).
+
+---
+
+## **3. Arquitetura**
+### **3.1. Tecnologias**
+- **Spring Boot:** Estrutura principal.
+- **Spring Security:** Autenticação JWT.
+- **Flyway:** Gerenciamento de banco de dados.
+- **Hibernate:** ORM para interações com banco.
+
+---
+
+## **4. Endpoints**
+### **4.1. Autenticação**
+- **POST** `/login`  
+  **Descrição:** Autenticar o usuário e retornar o token.  
+  **Body:** 
+  ```json
+  {
+    "login": "email@example.com",
+    "senha": "senha123"
+  }
+  ```
+  **Resposta:** `200 OK`
+
+---
+
+### **4.2. Usuários**
+#### **4.2.1. Cadastro de Usuário**
+- **POST** `/usuarios`  
+  **Descrição:** Cadastrar um novo usuário.  
+  **Body:**
+  ```json
+  {
+    "nome": "João Silva",
+    "email": "joao@example.com",
+    "telefone": "123456789",
+    "dataNascimento": "1990-01-01",
+    "genero": "MASCULINO",
+    "senha": "senha123"
+  }
+  ```
+  **Resposta:**
+  ```json
+  {
+    "id": 1,
+    "nome": "João Silva"
+  }
+  ```
+
+#### **4.2.2. Registrar Estado Emocional**
+- **POST** `/usuarios/{id}/historico`  
+  **Body:**
+  ```json
+  {
+    "estadoEmocional": "FELIZ",
+    "atividadeRealizada": "EXERCICIO"
+  }
+  ```
+  **Resposta:** `201 Created`
+
+#### **4.2.3. Listar Histórico por Período**
+- **GET** `/usuarios/{id}/historico_por_periodo?inicio=2024-01-01&fim=2024-12-31`  
+  **Resposta:**
+  ```json
+  [
+    {
+      "nome": "João Silva",
+      "dataRegistro": "2024-01-02",
+      "estadoEmocional": "FELIZ",
+      "atividadeRealizada": "EXERCICIO",
+      "mensagemMotivacional": "João, mantenha essa energia positiva enquanto se exercita!"
+    }
+  ]
+  ```
+
+---
+
+## **5. Modelo de Dados**
+### **5.1. Entidades**
+- **Usuario**:
+  - ID, nome, email, telefone, data de nascimento, estado emocional, atividade realizada.
+- **HistoricoEmocional**:
+  - ID, dataRegistro, estadoEmocional, atividadeRealizada, usuario.
+
+### **5.2. Enumerações**
+- **EstadoEmocionalEnum**: `FELIZ`, `TRISTE`, `ANSIOSO`, etc.
+- **AtividadeRealizadaEnum**: `EXERCICIO`, `LEITURA`, `TRABALHO`, etc.
+- **GeneroEnum**: `MASCULINO`, `FEMININO`, etc.
+
+---
+
+## **6. Mensagens Motivacionais**
+Lógica baseada em `MensagemMotivacional`:
+- Exemplo para estado **FELIZ** e atividade **EXERCICIO**:
+  ```java
+  "João, mantenha essa energia positiva enquanto se exercita!"
+  ```
+
+---
+
+## **7. Segurança**
+Configuração no arquivo `SecurityConfiguration.java`:
+- Rotas públicas: `/login`.
+- Rotas protegidas: `/usuarios/**`.
+
+---
+
+## **8. Scripts SQL**
+### **8.1. Estrutura das Tabelas**
+- Arquivo: `V1__create-table-usuarios.sql`
+```sql
+CREATE TABLE usuarios (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  telefone VARCHAR(15),
+  data_nascimento DATE,
+  ativo BOOLEAN DEFAULT TRUE
+);
+```
+
+- Arquivo: `V5__create-table-credenciais.sql`
+```sql
+CREATE TABLE credenciais (
+  id BIGINT PRIMARY KEY,
+  senha VARCHAR(255) NOT NULL
+);
+```
+
+---
+
+## **9. Contribuição**
+- Feedbacks e melhorias são bem-vindos! Abra uma PR ou envie um e-mail. 😄
+
+---
+
+Se precisar de mais ajustes ou detalhes, é só avisar! 🚀
