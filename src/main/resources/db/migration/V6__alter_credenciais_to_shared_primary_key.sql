@@ -1,8 +1,3 @@
-CREATE TABLE credenciais (
+ALTER TABLE credenciais
+ADD CONSTRAINT fk_credenciais_usuario FOREIGN KEY (id) REFERENCES usuarios(id);
 
-    id BIGINT not null AUTO_INCREMENT ,
-    login VARCHAR(100) NOT NULL,
-    senha VARCHAR(255) NOT NULL,
-
-    primary key(id)
-);

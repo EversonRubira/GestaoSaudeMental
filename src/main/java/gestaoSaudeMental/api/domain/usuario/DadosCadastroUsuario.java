@@ -25,13 +25,16 @@ public class DadosCadastroUsuario {
     @NotNull(message = "O gênero é obrigatório.")
     private GeneroEnum genero;
 
+    private String senha;
+
     // Construtor
-    public DadosCadastroUsuario(String nome, String email, String telefone, LocalDate dataNascimento, GeneroEnum genero) {
+    public DadosCadastroUsuario(String nome, String email, String telefone, LocalDate dataNascimento, GeneroEnum genero, String senha) {
         this.nome = nome;
         this.email = email;
         this.telefone = telefone;
         this.dataNascimento = dataNascimento;
         this.genero = genero;
+        this.senha = senha;
     }
 
     // Getters e Setters
@@ -50,6 +53,9 @@ public class DadosCadastroUsuario {
     public GeneroEnum getGenero() { return genero; }
     public void setGenero(GeneroEnum genero) { this.genero = genero; }
 
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
+
     @Override
     public String toString() {
         return "DadosCadastroUsuario{" +
@@ -58,6 +64,7 @@ public class DadosCadastroUsuario {
                 ", telefone='" + telefone + '\'' +
                 ", dataNascimento='" + dataNascimento + '\'' +
                 ", genero=" + genero +
+                ", senha='********'" +
                 '}';
     }
 }

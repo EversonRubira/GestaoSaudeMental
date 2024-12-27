@@ -1,8 +1,11 @@
 package gestaoSaudeMental.api.controller;
 
+import gestaoSaudeMental.api.domain.auth.Credenciais;
+import gestaoSaudeMental.api.domain.auth.CredenciaisRepository;
 import gestaoSaudeMental.api.domain.usuario.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,16 +18,23 @@ import java.util.List;
 public class UsuarioController {
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private UsuarioRepository repository;
 
     @Autowired
     private HistoricoEmocionalRepository historicoEmocionalRepository;
 
+    @Autowired
+    private CredenciaisRepository credenciaisRepository;
+
 //cadastro
     @PostMapping
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public DadosUsuarioCriadoDTO cadastrar(@org.jetbrains.annotations.NotNull @RequestBody DadosCadastroUsuario dados) {
+    public DadosUsuarioCriadoDTO cadastrar( @RequestBody DadosCadastroUsuario dados) {
+        String senhaHash = passwordEncoder.encode(dados.getSenha());
         var usuario = new Usuario(
                 null,
                 dados.getNome(),
@@ -37,7 +47,17 @@ public class UsuarioController {
                 dados.getGenero());
         repository.save(usuario);
 
+        var credenciais = new Credenciais(
+                null,
+                usuario,
+                senhaHash
+        );
+
+        credenciaisRepository.save(credenciais);
+
+        String mensagem = "Usuario criado com sucesso! " + usuario.getId();
         return new DadosUsuarioCriadoDTO(usuario.getId(), usuario.getNome());
+
     }
 //atualizacao dos dados emocionais pelo usuario
     @PostMapping("/{id}/historico")
