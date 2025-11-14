@@ -1,140 +1,79 @@
 package gestaoSaudeMental.api.controller;
 
-import gestaoSaudeMental.api.domain.auth.Credenciais;
-import gestaoSaudeMental.api.domain.auth.CredenciaisRepository;
 import gestaoSaudeMental.api.domain.usuario.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("usuarios")
+@Tag(name = "Usuários", description = "Endpoints para gerenciamento de usuários e histórico emocional")
 public class UsuarioController {
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private UsuarioService usuarioService;
 
     @Autowired
-    private UsuarioRepository repository;
+    private HistoricoEmocionalService historicoEmocionalService;
 
-    @Autowired
-    private HistoricoEmocionalRepository historicoEmocionalRepository;
-
-    @Autowired
-    private CredenciaisRepository credenciaisRepository;
-
-//cadastro
     @PostMapping
-    @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public DadosUsuarioCriadoDTO cadastrar( @RequestBody DadosCadastroUsuario dados) {
-        String senhaHash = passwordEncoder.encode(dados.getSenha());
-        var usuario = new Usuario(
-                null,
-                dados.getNome(),
-                dados.getEmail(),
-                dados.getTelefone(),
-                dados.getDataNascimento(),
-                true,
-                null,
-                null,
-                dados.getGenero());
-        repository.save(usuario);
-
-        var credenciais = new Credenciais(
-                null,
-                usuario,
-                senhaHash
-        );
-
-        credenciaisRepository.save(credenciais);
-
-        String mensagem = "Usuario criado com sucesso! " + usuario.getId();
-        return new DadosUsuarioCriadoDTO(usuario.getId(), usuario.getNome());
-
+    @Operation(summary = "Cadastrar novo usuário", description = "Cria um novo usuário no sistema com suas credenciais")
+    public DadosUsuarioCriadoDTO cadastrar(@RequestBody @Valid DadosCadastroUsuario dados) {
+        log.info("Requisição de cadastro recebida para o email: {}", dados.getEmail());
+        return usuarioService.cadastrarUsuario(dados);
     }
-//atualizacao dos dados emocionais pelo usuario
+
     @PostMapping("/{id}/historico")
-    @Transactional
     @ResponseStatus(HttpStatus.CREATED)
+    @SecurityRequirement(name = "bearer-key")
+    @Operation(summary = "Registrar estado emocional", description = "Registra o estado emocional atual do usuário com a atividade realizada")
     public String registrarEstadoEmocional(
             @PathVariable Long id,
-            @RequestBody DadosRegistroEstadoEmocionalDTO dados) {
-         var usuario = repository.findById(id)
-                 .orElseThrow(() -> new RuntimeException("Usuario nao Cadastrado"));
-         var historico = new HistoricoEmocional(
-                 null,
-                 LocalDate.now(),
-                 dados.estadoEmocional(),
-                 dados.atividadeRealizada(),
-                 usuario
-         );
-         historicoEmocionalRepository.save(historico);
-
-        // Obter mensagem motivacional
-        String mensagem = MensagemMotivacional.obterMensagem(dados.estadoEmocional(), dados.atividadeRealizada(), usuario.getNome());
-
-         return "Registro de estado emocional criado com sucesso para o usuário com ID " + id + ".";
+            @RequestBody @Valid DadosRegistroEstadoEmocionalDTO dados) {
+        log.info("Registrando estado emocional para usuário ID: {}", id);
+        return historicoEmocionalService.registrarEstadoEmocional(id, dados);
     }
 
-    //Fornece flexibilidade para o cliente buscar o histórico emocional de um período específico.
     @GetMapping("/{id}/historico_por_periodo")
+    @SecurityRequirement(name = "bearer-key")
+    @Operation(summary = "Listar histórico por período", description = "Lista o histórico emocional do usuário em um período específico (padrão: últimos 30 dias)")
     public List<DadosListagemEstadoEmocionalDTO> listarPorPeriodo(
             @PathVariable Long id,
-            @RequestParam (required = false) String inicio,
-            @RequestParam (required = false) String fim) {
-        LocalDate dataInicio = (inicio != null) ? LocalDate.parse(inicio) : LocalDate.now().minusDays(30);
-        LocalDate dataFim = (fim != null) ? LocalDate.parse(fim) : LocalDate.now();
-        if(dataInicio.isAfter(dataFim)) {
-            throw new IllegalArgumentException("A data de início não pode ser maior que a data de fim.");
-        }
-        return historicoEmocionalRepository
-                .findByUsuarioIdAndDataRegistroBetween(id, dataInicio, dataFim)
-                .stream()
-                .map(DadosListagemEstadoEmocionalDTO::new)
-                .toList();
+            @RequestParam(required = false) String inicio,
+            @RequestParam(required = false) String fim) {
+        log.info("Consultando histórico por período para usuário ID: {}", id);
+        return historicoEmocionalService.listarPorPeriodo(id, inicio, fim);
     }
 
-    //Fornece uma visão completa por emocao
     @GetMapping("/{id}/historico-cronologico")
+    @SecurityRequirement(name = "bearer-key")
+    @Operation(summary = "Listar histórico cronológico", description = "Lista todo o histórico emocional do usuário em ordem cronológica, com filtro opcional por emoção")
     public List<DadosListagemEstadoEmocionalDTO> listagemPorEmocao(
             @PathVariable Long id,
-            @RequestParam (required = false) EstadoEmocionalEnum emocao) {
-        List<HistoricoEmocional> resultados;
-
-        if (emocao != null) {
-            // Filtrar por usuário e emoção
-            resultados = historicoEmocionalRepository.findByUsuarioIdAndEstadoEmocionalOrderByDataRegistroAsc(id, emocao);
-        } else {
-            // Listar todo o histórico cronológico
-            resultados = historicoEmocionalRepository.findByUsuarioIdOrderByDataRegistroAsc(id);
-        }
-
-        return resultados.stream()
-                .map(DadosListagemEstadoEmocionalDTO::new)
-                .toList();
+            @RequestParam(required = false) EstadoEmocionalEnum emocao) {
+        log.info("Consultando histórico cronológico para usuário ID: {}", id);
+        return historicoEmocionalService.listarPorEmocao(id, emocao);
     }
 
-    @DeleteMapping
-    @Transactional
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String excluirConta(@PathVariable Long id) {
-        var usuario = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado."));
-
-        usuario.setAtivo(false);
-        repository.save(usuario);
-
-        return "Usuário com ID " + id + " foi desativado com sucesso.";
-
+    @SecurityRequirement(name = "bearer-key")
+    @Operation(summary = "Desativar conta", description = "Desativa a conta do usuário (exclusão lógica)")
+    public ResponseEntity<Void> excluirConta(@PathVariable Long id) {
+        log.info("Desativando conta do usuário ID: {}", id);
+        usuarioService.desativarUsuario(id);
+        return ResponseEntity.noContent().build();
     }
-
 }
 
 
