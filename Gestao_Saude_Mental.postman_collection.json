@@ -1,0 +1,451 @@
+{
+  "info": {
+    "name": "Gestão Saúde Mental API",
+    "description": "Collection completa para testar a API de Gestão de Saúde Mental com autenticação JWT",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticação",
+      "item": [
+        {
+          "name": "Cadastrar Usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"user_id\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"user_id\", jsonData.id);",
+                  "    console.log(\"User ID salvo: \" + jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"maria@email.com\",\n  \"telefone\": \"11987654321\",\n  \"dataNascimento\": \"1995-05-15\",\n  \"genero\": \"FEMININO\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Cria um novo usuário no sistema. Retorna o ID do usuário criado."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "    pm.collectionVariables.set(\"token\", jsonData.token);",
+                  "    console.log(\"Token JWT salvo: \" + jsonData.token.substring(0, 30) + \"...\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"maria@email.com\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Autentica o usuário e retorna um token JWT válido por 24 horas."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints públicos para cadastro e autenticação"
+    },
+    {
+      "name": "2. Histórico Emocional",
+      "item": [
+        {
+          "name": "Registrar Estado Emocional - FELIZ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estadoEmocional\": \"FELIZ\",\n  \"atividadeRealizada\": \"EXERCICIO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}/historico",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}", "historico"]
+            },
+            "description": "Registra estado emocional FELIZ com atividade EXERCICIO"
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar Estado Emocional - ANSIOSO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estadoEmocional\": \"ANSIOSO\",\n  \"atividadeRealizada\": \"MEDITAR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}/historico",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}", "historico"]
+            },
+            "description": "Registra estado emocional ANSIOSO com atividade MEDITAR"
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar Estado Emocional - TRISTE",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estadoEmocional\": \"TRISTE\",\n  \"atividadeRealizada\": \"LEITURA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}/historico",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}", "historico"]
+            },
+            "description": "Registra estado emocional TRISTE com atividade LEITURA"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para registrar estados emocionais (requer autenticação)"
+    },
+    {
+      "name": "3. Consultas de Histórico",
+      "item": [
+        {
+          "name": "Listar Histórico Completo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}/historico-cronologico",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}", "historico-cronologico"]
+            },
+            "description": "Lista todo o histórico emocional do usuário em ordem cronológica"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Histórico por Período (Últimos 30 dias)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}/historico_por_periodo",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}", "historico_por_periodo"]
+            },
+            "description": "Lista histórico dos últimos 30 dias (padrão)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Histórico por Período Customizado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}/historico_por_periodo?inicio=2025-11-01&fim=2025-11-30",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}", "historico_por_periodo"],
+              "query": [
+                {
+                  "key": "inicio",
+                  "value": "2025-11-01",
+                  "description": "Data inicial (YYYY-MM-DD)"
+                },
+                {
+                  "key": "fim",
+                  "value": "2025-11-30",
+                  "description": "Data final (YYYY-MM-DD)"
+                }
+              ]
+            },
+            "description": "Lista histórico em um período específico"
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar por Emoção Específica",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}/historico-cronologico?emocao=FELIZ",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}", "historico-cronologico"],
+              "query": [
+                {
+                  "key": "emocao",
+                  "value": "FELIZ",
+                  "description": "Valores: FELIZ, TRISTE, ANSIOSO, CANSADO, IRRITADO, OUTROS"
+                }
+              ]
+            },
+            "description": "Filtra histórico por uma emoção específica"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para consultar histórico emocional (requer autenticação)"
+    },
+    {
+      "name": "4. Gerenciamento de Conta",
+      "item": [
+        {
+          "name": "Desativar Conta",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "{{user_id}}"]
+            },
+            "description": "Desativa a conta do usuário (exclusão lógica). Retorna 204 No Content."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gerenciar conta do usuário"
+    },
+    {
+      "name": "5. Testes de Validação (Erros Esperados)",
+      "item": [
+        {
+          "name": "Email Inválido (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Teste Erro\",\n  \"email\": \"email_invalido\",\n  \"telefone\": \"11987654321\",\n  \"dataNascimento\": \"1990-01-01\",\n  \"genero\": \"MASCULINO\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Testa validação de email. Deve retornar 400 Bad Request."
+          },
+          "response": []
+        },
+        {
+          "name": "Email Duplicado (409 Conflict)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Outro Usuario\",\n  \"email\": \"maria@email.com\",\n  \"telefone\": \"11999999999\",\n  \"dataNascimento\": \"1990-01-01\",\n  \"genero\": \"FEMININO\",\n  \"senha\": \"senha456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Testa email duplicado. Deve retornar 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "Senha Incorreta (401 Unauthorized)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"maria@email.com\",\n  \"senha\": \"senha_errada\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Testa login com senha incorreta. Deve retornar 401 Unauthorized."
+          },
+          "response": []
+        },
+        {
+          "name": "Acesso Sem Token (403 Forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/1/historico-cronologico",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "1", "historico-cronologico"]
+            },
+            "description": "Testa acesso a endpoint protegido sem token. Deve retornar 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "Token Inválido (401 Unauthorized)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer token_invalido_123"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/1/historico-cronologico",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "1", "historico-cronologico"]
+            },
+            "description": "Testa acesso com token inválido. Deve retornar 401 Unauthorized."
+          },
+          "response": []
+        }
+      ],
+      "description": "Testes de validação e tratamento de erros"
+    },
+    {
+      "name": "6. Utilitários",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hello",
+              "host": ["{{base_url}}"],
+              "path": ["hello"]
+            },
+            "description": "Endpoint de teste para verificar se a API está rodando"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints utilitários"
+    }
+  ]
+}
