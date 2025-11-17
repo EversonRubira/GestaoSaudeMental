@@ -49,7 +49,7 @@ Funcionalidades Atuais
 Cadastro de Usuários: Permite o registro de novos usuários com informações pessoais básicas.
 Registro Diário de Estado Emocional: Os usuários podem registrar seu estado emocional atual e a atividade realizada.
 Histórico Emocional Pessoal: Exibição do histórico emocional do usuário, permitindo a análise de tendências ao longo do tempo.
-Sugestões Motivacionais Personalizadas: Com base no estado emocional e na atividade realizada, o sistema fornece mensagens motivacionais.
+Sugestões Motivacionais com IA: Sistema de mensagens motivacionais personalizadas usando inteligência artificial (OpenAI), com fallback para mensagens pré-configuradas quando a IA não está disponível.
 Exclusão Lógica de Usuários: Usuários podem ser desativados sem perder seus dados históricos.
 Endpoints da API
 Usuários
@@ -62,15 +62,34 @@ GET /usuarios/{id}/historico_por_periodo: Exibe o histórico emocional de um usu
 GET /usuarios/{id}/historico-cronologico: Lista o histórico emocional completo do usuário em ordem cronológica.
 Tecnologias Utilizadas
 Java 17
-Spring Boot 3.3.2
+Spring Boot 3.3.4
 JPA/Hibernate
 MySQL (gerenciado com Flyway)
 Maven para gerenciamento de dependências
+Spring WebFlux para chamadas HTTP assíncronas
+OpenAI API para geração de mensagens motivacionais com IA
+Configuração de IA (Opcional)
+Para habilitar respostas motivacionais geradas por IA:
+
+1. Obtenha uma chave de API da OpenAI em https://platform.openai.com/api-keys
+2. Configure no arquivo `application.properties`:
+   ```properties
+   ai.enabled=true
+   openai.api.key=sua-chave-aqui
+   openai.api.model=gpt-3.5-turbo
+   ```
+3. Ou use variáveis de ambiente (recomendado para produção):
+   ```bash
+   export AI_ENABLED=true
+   export OPENAI_API_KEY=sua-chave-aqui
+   ```
+
+Nota: Se a IA não estiver configurada, o sistema usará mensagens pré-configuradas automaticamente.
+
 Ajustes e Melhorias Planejados
 Análise de Tendências Emocionais: Implementação de gráficos dinâmicos para visualização de tendências (usando Python/Matplotlib).
 Notificações e Lembretes: Lembretes configuráveis para registro diário de estado emocional.
-Autenticação e Autorização: Implementação de autenticação JWT para proteger os endpoints.
-Sugestões Mais Avançadas: Integração com APIs externas para enriquecer as sugestões motivacionais.
+Suporte a Múltiplos Provedores de IA: Adicionar suporte para Anthropic Claude, Google Gemini, etc.
 Interface Gráfica: Desenvolvimento de um frontend intuitivo.
 Testes Automatizados: Testes unitários e de integração para maior confiabilidade.
 Deploy: Configuração de containers Docker para facilitar o deploy.
