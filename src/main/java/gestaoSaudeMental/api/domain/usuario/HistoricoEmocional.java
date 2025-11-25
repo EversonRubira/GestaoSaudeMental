@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "historico_emocional")
@@ -24,7 +25,25 @@ public class HistoricoEmocional {
     private EstadoEmocionalEnum estadoEmocional;  // Estado emocional do momento
 
     @Enumerated(EnumType.STRING)
-    private AtividadeRealizadaEnum atividadeRealizada;  // Atividade realizada
+    private AtividadeRealizadaEnum atividadeRealizada;  // Atividade realizada (mantido para compatibilidade)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel_energia")
+    private NivelEnergiaEnum nivelEnergia;  // Nível de energia do usuário
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "historico_contextos", joinColumns = @JoinColumn(name = "historico_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "contexto")
+    private List<ContextoEnum> contextos;  // Contextos que impactaram o dia
+
+    @ManyToOne
+    @JoinColumn(name = "sugestao_id")
+    private Sugestao sugestaoRecebida;  // Sugestão que foi dada ao usuário
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "feedback_sugestao")
+    private FeedbackSugestaoEnum feedbackSugestao;  // Feedback do usuário sobre a sugestão
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")  // Chave estrangeira para o usuário

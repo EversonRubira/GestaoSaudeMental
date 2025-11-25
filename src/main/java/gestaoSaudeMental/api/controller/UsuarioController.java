@@ -29,6 +29,12 @@ public class UsuarioController {
     @Autowired
     private CredenciaisRepository credenciaisRepository;
 
+    @Autowired
+    private SugestaoService sugestaoService;
+
+    @Autowired
+    private SugestaoRepository sugestaoRepository;
+
 //cadastro
     @PostMapping
     @Transactional
@@ -119,6 +125,51 @@ public class UsuarioController {
         return resultados.stream()
                 .map(DadosListagemEstadoEmocionalDTO::new)
                 .toList();
+    }
+
+    // Novo endpoint: Obter sugestão personalizada
+    @PostMapping("/{id}/sugestao")
+    public DadosSugestaoDTO obterSugestao(
+            @PathVariable Long id,
+            @RequestBody DadosSolicitacaoSugestaoDTO dados) {
+        var usuario = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado."));
+
+        return sugestaoService.gerarSugestao(
+                dados.estadoEmocional(),
+                dados.nivelEnergia(),
+                dados.contextos(),
+                id
+        );
+    }
+
+    // Novo endpoint: Registrar estado emocional COM sugestão e feedback
+    @PostMapping("/{id}/historico-completo")
+    @Transactional
+    @ResponseStatus(HttpStatus.CREATED)
+    public String registrarComSugestao(
+            @PathVariable Long id,
+            @RequestBody DadosRegistroComSugestaoDTO dados) {
+        var usuario = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado."));
+
+        Sugestao sugestao = null;
+        if (dados.sugestaoId() != null) {
+            sugestao = sugestaoRepository.findById(dados.sugestaoId()).orElse(null);
+        }
+
+        var historico = new HistoricoEmocional();
+        historico.setDataRegistro(LocalDate.now());
+        historico.setEstadoEmocional(dados.estadoEmocional());
+        historico.setNivelEnergia(dados.nivelEnergia());
+        historico.setContextos(dados.contextos());
+        historico.setSugestaoRecebida(sugestao);
+        historico.setFeedbackSugestao(dados.feedbackSugestao());
+        historico.setUsuario(usuario);
+
+        historicoEmocionalRepository.save(historico);
+
+        return "Registro completo criado com sucesso para o usuário com ID " + id + ".";
     }
 
     @DeleteMapping
