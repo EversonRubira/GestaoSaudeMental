@@ -12,15 +12,32 @@ public class SugestaoService {
     @Autowired
     private SugestaoRepository sugestaoRepository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     /**
-     * Gera sugestão personalizada baseada em emoção, energia e contextos
+     * Gera sugestão personalizada baseada em emoção, energia, contextos, ciclo menstrual e sintomas
      */
     public DadosSugestaoDTO gerarSugestao(
             EstadoEmocionalEnum emocao,
             NivelEnergiaEnum energia,
             List<ContextoEnum> contextos,
+            CicloMenstrualEnum cicloMenstrual,
+            List<SintomaFisicoEnum> sintomas,
             Long usuarioId
     ) {
+        // PRIORIDADE 1: Se está menstruada COM sintomas intensos (cólica)
+        if (cicloMenstrual == CicloMenstrualEnum.SIM_MENSTRUADA &&
+            sintomas != null && sintomas.contains(SintomaFisicoEnum.COLICA)) {
+            return getSugestaoMenstrualComColica(emocao, energia);
+        }
+
+        // PRIORIDADE 2: Se está menstruada SEM cólica (outros sintomas)
+        if (cicloMenstrual == CicloMenstrualEnum.SIM_MENSTRUADA) {
+            return getSugestaoMenstrualGeral(emocao, energia, sintomas);
+        }
+
+        // PRIORIDADE 3: Lógica normal (matriz padrão)
         // 1. Buscar candidatas por emoção e energia
         List<Sugestao> candidatas = sugestaoRepository
                 .findByEstadoEmocionalAndNivelEnergiaAndAtivaTrue(emocao, energia);
@@ -139,6 +156,120 @@ public class SugestaoService {
                 icone,
                 razao,
                 List.of(),
+                null,
+                null
+        );
+    }
+
+    /**
+     * Sugestão específica para período menstrual COM cólica
+     */
+    private DadosSugestaoDTO getSugestaoMenstrualComColica(
+            EstadoEmocionalEnum emocao,
+            NivelEnergiaEnum energia
+    ) {
+        String titulo, descricao, razao;
+        List<String> alternativas;
+
+        // Independente da emoção, cólica é prioridade
+        if (energia == NivelEnergiaEnum.ESGOTADO || energia == NivelEnergiaEnum.BAIXO) {
+            titulo = "Bolsa Térmica + Repouso";
+            descricao = "Deite-se em posição fetal com bolsa de água quente no abdômen por 20 minutos";
+            razao = "Cólica menstrual + energia baixa exige repouso. O calor relaxa os músculos uterinos e alivia a dor.";
+            alternativas = List.of(
+                "Chá de gengibre morno",
+                "Massagem abdominal suave em círculos",
+                "Posição joelhos no peito (alivia pressão)"
+            );
+        } else {
+            titulo = "Caminhada Suave + Calor";
+            descricao = "Faça caminhada leve de 10 min, depois aplique calor no abdômen";
+            razao = "Movimento suave aumenta circulação e pode reduzir cólica. Você tem energia para um leve exercício.";
+            alternativas = List.of(
+                "Yoga restaurativa (postura criança)",
+                "Alongamento suave",
+                "Natação leve (se disponível)"
+            );
+        }
+
+        return new DadosSugestaoDTO(
+                null,
+                titulo,
+                descricao,
+                "Alívio Menstrual",
+                "20 min",
+                "🌸",
+                razao,
+                alternativas,
+                null,
+                null
+        );
+    }
+
+    /**
+     * Sugestão específica para período menstrual SEM cólica intensa
+     */
+    private DadosSugestaoDTO getSugestaoMenstrualGeral(
+            EstadoEmocionalEnum emocao,
+            NivelEnergiaEnum energia,
+            List<SintomaFisicoEnum> sintomas
+    ) {
+        String titulo, descricao, razao;
+        List<String> alternativas;
+
+        boolean temFadiga = sintomas != null && sintomas.contains(SintomaFisicoEnum.FADIGA);
+        boolean temEnjooDor = sintomas != null &&
+                (sintomas.contains(SintomaFisicoEnum.ENJOO) ||
+                 sintomas.contains(SintomaFisicoEnum.DOR_CABECA));
+
+        if (temFadiga || energia == NivelEnergiaEnum.ESGOTADO || energia == NivelEnergiaEnum.BAIXO) {
+            titulo = "Autocuidado Gentil";
+            descricao = "Priorize descanso, hidratação e alimentos leves. Evite atividades intensas.";
+            razao = "Durante o período menstrual com fadiga, o corpo precisa de energia para recuperação.";
+            alternativas = List.of(
+                "Cochilo de 20 minutos",
+                "Chá relaxante + leitura leve",
+                "Banho morno"
+            );
+        } else if (temEnjooDor) {
+            titulo = "Hidratação + Ambiente Calmo";
+            descricao = "Beba água, reduza luminosidade e evite telas por 30 minutos";
+            razao = "Enjoo e dor de cabeça durante o período podem ser aliviados com descanso sensorial.";
+            alternativas = List.of(
+                "Compressa fria na testa",
+                "Aromaterapia (lavanda)",
+                "Deitar em ambiente escuro"
+            );
+        } else if (emocao == EstadoEmocionalEnum.TRISTE || emocao == EstadoEmocionalEnum.ANSIOSO) {
+            titulo = "Movimento Suave + Conexão";
+            descricao = "Yoga leve ou caminhada tranquila. Converse com alguém querido.";
+            razao = "Alterações hormonais podem intensificar emoções. Movimento gentil e conexão ajudam.";
+            alternativas = List.of(
+                "Journaling (escrever sentimentos)",
+                "Ouvir música reconfortante",
+                "Assistir algo leve"
+            );
+        } else {
+            // Feliz ou neutro com energia razoável
+            titulo = "Aproveite com Moderação";
+            descricao = "Você pode manter atividades normais, mas evite exercícios muito intensos";
+            razao = "Nem todo período é igual. Se está se sentindo bem, mantenha sua rotina com ajustes leves.";
+            alternativas = List.of(
+                "Caminhada moderada",
+                "Atividades criativas",
+                "Socialização leve"
+            );
+        }
+
+        return new DadosSugestaoDTO(
+                null,
+                titulo,
+                descricao,
+                "Cuidado Menstrual",
+                "variável",
+                "🌸",
+                razao,
+                alternativas,
                 null,
                 null
         );

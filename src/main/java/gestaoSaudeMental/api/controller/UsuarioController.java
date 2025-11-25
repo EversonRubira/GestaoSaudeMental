@@ -139,6 +139,8 @@ public class UsuarioController {
                 dados.estadoEmocional(),
                 dados.nivelEnergia(),
                 dados.contextos(),
+                dados.cicloMenstrual(),
+                dados.sintomasFisicos(),
                 id
         );
     }
@@ -163,6 +165,8 @@ public class UsuarioController {
         historico.setEstadoEmocional(dados.estadoEmocional());
         historico.setNivelEnergia(dados.nivelEnergia());
         historico.setContextos(dados.contextos());
+        historico.setCicloMenstrual(dados.cicloMenstrual());
+        historico.setSintomasFisicos(dados.sintomasFisicos());
         historico.setSugestaoRecebida(sugestao);
         historico.setFeedbackSugestao(dados.feedbackSugestao());
         historico.setUsuario(usuario);
