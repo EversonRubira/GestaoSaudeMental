@@ -1,0 +1,13 @@
+spring.application.name=api
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/gestaosaudemental_api
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+
+# Flyway
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+
+# JWT (adicionar quando implementar)
+# api.security.token.secret=${JWT_SECRET}
