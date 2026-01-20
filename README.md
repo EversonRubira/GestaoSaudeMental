@@ -82,8 +82,6 @@ Crie uma branch para sua funcionalidade ou correção (git checkout -b minha-fea
 Envie suas alterações por meio de um pull request.
 
 
-Com todos os arquivos agora carregados, vou estruturar a documentação final para o seu projeto. O resultado incluirá:
-
 1. **Introdução**
    - Visão geral e objetivo da API.
 
@@ -110,10 +108,6 @@ Com todos os arquivos agora carregados, vou estruturar a documentação final pa
 
 8. **Scripts SQL**
    - Estrutura das tabelas no banco de dados e scripts utilizados.
-
-Aguarde só um instante enquanto organizo tudo! 😄
-
-Aqui está a **documentação completa** para o seu projeto! 🎉
 
 ---
 
@@ -279,8 +273,8 @@ CREATE TABLE credenciais (
 ---
 
 ## **9. Contribuição**
-- Feedbacks e melhorias são bem-vindos! Abra uma PR ou envie um e-mail. 😄
+- Feedbacks e melhorias são bem-vindos! Abra uma PR ou envie um e-mail. 
 
 ---
 
-Se precisar de mais ajustes ou detalhes, é só avisar! 🚀
+Se precisar de mais ajustes ou detalhes, é só avisar! 
