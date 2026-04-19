@@ -3,12 +3,12 @@ package gestaoSaudeMental.api.controller;
 import gestaoSaudeMental.api.domain.auth.Credenciais;
 import gestaoSaudeMental.api.domain.auth.CredenciaisRepository;
 import gestaoSaudeMental.api.domain.usuario.*;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,12 +29,10 @@ public class UsuarioController {
     @Autowired
     private CredenciaisRepository credenciaisRepository;
 
-//cadastro
     @PostMapping
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public DadosUsuarioCriadoDTO cadastrar( @RequestBody DadosCadastroUsuario dados) {
-        String senhaHash = passwordEncoder.encode(dados.getSenha());
+    public DadosUsuarioCriadoDTO cadastrar(@RequestBody @Valid DadosCadastroUsuario dados) {
         var usuario = new Usuario(
                 null,
                 dados.getNome(),
@@ -47,53 +45,50 @@ public class UsuarioController {
                 dados.getGenero());
         repository.save(usuario);
 
-        var credenciais = new Credenciais(
-                null,
-                usuario,
-                senhaHash
-        );
-
+        var credenciais = new Credenciais(null, usuario, passwordEncoder.encode(dados.getSenha()));
         credenciaisRepository.save(credenciais);
 
-        String mensagem = "Usuario criado com sucesso! " + usuario.getId();
         return new DadosUsuarioCriadoDTO(usuario.getId(), usuario.getNome());
-
     }
-//atualizacao dos dados emocionais pelo usuario
+
     @PostMapping("/{id}/historico")
     @Transactional
     @ResponseStatus(HttpStatus.CREATED)
-    public String registrarEstadoEmocional(
+    public DadosRegistroHistoricoResponseDTO registrarEstadoEmocional(
             @PathVariable Long id,
-            @RequestBody DadosRegistroEstadoEmocionalDTO dados) {
-         var usuario = repository.findById(id)
-                 .orElseThrow(() -> new RuntimeException("Usuario nao Cadastrado"));
-         var historico = new HistoricoEmocional(
-                 null,
-                 LocalDate.now(),
-                 dados.estadoEmocional(),
-                 dados.atividadeRealizada(),
-                 usuario
-         );
-         historicoEmocionalRepository.save(historico);
+            @RequestBody @Valid DadosRegistroEstadoEmocionalDTO dados) {
 
-        // Obter mensagem motivacional
-        String mensagem = MensagemMotivacional.obterMensagem(dados.estadoEmocional(), dados.atividadeRealizada(), usuario.getNome());
+        var usuario = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
-         return "Registro de estado emocional criado com sucesso para o usuário com ID " + id + ".";
+        var historico = new HistoricoEmocional(
+                null,
+                LocalDate.now(),
+                dados.estadoEmocional(),
+                dados.atividadeRealizada(),
+                usuario
+        );
+        historicoEmocionalRepository.save(historico);
+
+        String mensagem = MensagemMotivacional.obterMensagem(
+                dados.estadoEmocional(), dados.atividadeRealizada(), usuario.getNome());
+
+        return new DadosRegistroHistoricoResponseDTO(historico.getId(), mensagem);
     }
 
-    //Fornece flexibilidade para o cliente buscar o histórico emocional de um período específico.
     @GetMapping("/{id}/historico_por_periodo")
     public List<DadosListagemEstadoEmocionalDTO> listarPorPeriodo(
             @PathVariable Long id,
-            @RequestParam (required = false) String inicio,
-            @RequestParam (required = false) String fim) {
+            @RequestParam(required = false) String inicio,
+            @RequestParam(required = false) String fim) {
+
         LocalDate dataInicio = (inicio != null) ? LocalDate.parse(inicio) : LocalDate.now().minusDays(30);
         LocalDate dataFim = (fim != null) ? LocalDate.parse(fim) : LocalDate.now();
-        if(dataInicio.isAfter(dataFim)) {
+
+        if (dataInicio.isAfter(dataFim)) {
             throw new IllegalArgumentException("A data de início não pode ser maior que a data de fim.");
         }
+
         return historicoEmocionalRepository
                 .findByUsuarioIdAndDataRegistroBetween(id, dataInicio, dataFim)
                 .stream()
@@ -101,18 +96,16 @@ public class UsuarioController {
                 .toList();
     }
 
-    //Fornece uma visão completa por emocao
     @GetMapping("/{id}/historico-cronologico")
     public List<DadosListagemEstadoEmocionalDTO> listagemPorEmocao(
             @PathVariable Long id,
-            @RequestParam (required = false) EstadoEmocionalEnum emocao) {
-        List<HistoricoEmocional> resultados;
+            @RequestParam(required = false) EstadoEmocionalEnum emocao) {
 
+        List<HistoricoEmocional> resultados;
         if (emocao != null) {
-            // Filtrar por usuário e emoção
-            resultados = historicoEmocionalRepository.findByUsuarioIdAndEstadoEmocionalOrderByDataRegistroAsc(id, emocao);
+            resultados = historicoEmocionalRepository
+                    .findByUsuarioIdAndEstadoEmocionalOrderByDataRegistroAsc(id, emocao);
         } else {
-            // Listar todo o histórico cronológico
             resultados = historicoEmocionalRepository.findByUsuarioIdOrderByDataRegistroAsc(id);
         }
 
@@ -121,22 +114,14 @@ public class UsuarioController {
                 .toList();
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public String excluirConta(@PathVariable Long id) {
+    public void excluirConta(@PathVariable Long id) {
         var usuario = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado."));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
         usuario.setAtivo(false);
         repository.save(usuario);
-
-        return "Usuário com ID " + id + " foi desativado com sucesso.";
-
     }
-
 }
-
-
-
-
