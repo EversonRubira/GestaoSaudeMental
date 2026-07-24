@@ -15,3 +15,11 @@ tamanho atual do domínio).
 
 **Escopo:** aplica-se a todo código novo a partir de agora. Refactor do
 código existente é incremental, não é um sprint isolado.
+
+## Pendências identificadas
+
+- UsuarioController acumula responsabilidade de Service: cria/salva Usuario 
+  e Credenciais diretamente, sem camada Service. Identificado em 24/07/2026 
+  durante estudo do curso Spring Boot 3 (Alura). 
+  Candidato a PRD futuro, seguindo o mesmo padrão já decidido para a 
+  arquitetura Controller → Service → Repository.
